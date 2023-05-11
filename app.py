@@ -4,8 +4,10 @@ from pymongo import MongoClient
 import json
 from bson import ObjectId, json_util
 from datetime import datetime, timedelta
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 
 # MongoDB connection config
 mongodb_uri = 'mongodb+srv://dxn183:P4TnUn0wuNZqztQx@cluster0.7tqovhs.mongodb.net/'
