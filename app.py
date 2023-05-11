@@ -11,6 +11,7 @@ app = Flask(__name__)
 mongodb_uri = 'mongodb+srv://dxn183:P4TnUn0wuNZqztQx@cluster0.7tqovhs.mongodb.net/'
 client = MongoClient(mongodb_uri)
 
+
 # fetch company with multiple alias
 def get_single_company_api(company):
     db = client.reddit_data.company_sentiment_day_interval
@@ -24,12 +25,13 @@ def get_single_company_api(company):
     ]
 
     rating = {}
+    result = None
     for interval_name, interval_start in intervals:
         if interval_start is None:
             match = {"company": company}
         else:
             match = {
-                "company": company, 
+                "company": company,
                 "utc_timestamp": {"$gte": interval_start.timestamp()}
             }
 
@@ -53,6 +55,8 @@ def get_single_company_api(company):
                 {"name": "Neutral", "percent": result["neutral_avg"]},
                 {"name": "Negative", "percent": result["negative_avg"]},
             ]
+        else:
+            result = None
 
     company_sentiment = {
         "companyName": company,
@@ -61,29 +65,17 @@ def get_single_company_api(company):
     }
 
     return json.loads(json_util.dumps(company_sentiment))
-        
+
 
 # searching a company
 @app.route('/api/<company>/', methods=['GET'])
 def fetch_single_company(company):
     return get_single_company_api(company=company)
 
+
 # retrieving all companies
 @app.route('/api/', methods=['GET'])
 def get_all_companies():
-    # comp_list = [
-    #     ["dropbox"],
-    #     ["snap"],
-    #     ["aws", "amazon"],
-    #     ["roku"],
-    #     ["mongodb"],
-    #     ["oci", "oracle"],
-    #     ["servicenow"],
-    #     ["snowflake"],
-    #     ["paypal"],
-    #     ["msft", "microsoft"]
-    # ]
-
     comp_list = [
         "dropbox", "snap", "aws", "roku", "mongodb",
         "oci", "servicenow", "snowflake", "paypal", "microsoft"
@@ -92,8 +84,9 @@ def get_all_companies():
     result = []
     for company in comp_list:
         result.append(get_single_company_api(company=company))
-    
-    return result
+
+    return jsonify(result)
+
 
 if __name__ == '__main__':
     app.run()
